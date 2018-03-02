@@ -1,0 +1,12 @@
+{
+	"name": "orange-prime-bot",
+	"version": "0.0.1",
+	"description": "OrangePrime finds a rhyme",
+	"main": "bot.js",
+	"author": "Leo",
+	"dependencies": {
+		"discord.js": "^11.2.1",
+		"ffmpeg-binaries": "^3.2.2-3",
+		"node-opus": "^0.2.7"
+	}
+}
