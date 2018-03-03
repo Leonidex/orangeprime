@@ -14,6 +14,11 @@ ARGS_INDEX = 1
 
 var commands = {
 
+	ADMIN_GROUP: {
+		// Text Channel Commands
+		RESTART: {call: 'restart', description: 'Restart the bot.'},
+	},
+
 	UTIL_GROUP: {
 		HELP: {call: 'help', description: 'Get the list of available commands.'},
 
@@ -74,20 +79,33 @@ bot.on('message', message => {
 			args = args.splice(ARGS_INDEX);
 
 			switch(cmd) {
-				// Help, commands list
+				//
+				// Admin
+				//
+				case commands.ADMIN_GROUP.RESTART.call:
+					// No implementation yet
+				break;
+
+				//
+				// Utility
+				//
 				case commands.UTIL_GROUP.HELP.call:
 				    botMessage = ''
 
 					for (group in commands) {
-				    	Object.keys(commands[group]).forEach(cmdObj => {
-					    	botMessage += '\n' + "[" + commands[group][cmdObj].call + "]";
-					    	if (commands[group][cmdObj].short) {
-					    		botMessage += '/' + "[" + commands[group][cmdObj].short + "]";
-					    	}
-					    	botMessage += ': ' + commands[group][cmdObj].description;
-					    });
+						if (group == "ADMIN_GROUP") {	// Skip the admin commands.
+							continue;
+						} else {	// Add all commands into the botMessage string.
+					    	Object.keys(commands[group]).forEach(cmdObj => {
+						    	botMessage += '\n' + "[" + commands[group][cmdObj].call + "]";
+						    	if (commands[group][cmdObj].short) {
+						    		botMessage += '/' + "[" + commands[group][cmdObj].short + "]";
+						    	}
+						    	botMessage += ': ' + commands[group][cmdObj].description;
+						    });
 
-					    botMessage +="\n";
+						    botMessage +="\n";
+						}
 				    }
 				    
 					message.channel.send(BOLD + 'The available commands are:' + BOLD
@@ -98,7 +116,10 @@ bot.on('message', message => {
 				case commands.UTIL_GROUP.PING.call:
 				    message.reply('Pong!');
 					break;
+
+				//	
 				// Urban dictionary
+				//
 				case commands.UD_GROUP.URBAN_DICT.call:
 				case commands.UD_GROUP.URBAN_DICT.short:
 				    botMessage = ''
@@ -128,6 +149,10 @@ bot.on('message', message => {
 				        message.channel.send(botMessage);
 				    })
 					break;
+
+				//
+				// Misc
+				//
 				case commands.MISC_GROUP.COFFEE.call:
 					botMessage = HAIKU +
 						'\n' + '                        (' +
@@ -155,6 +180,10 @@ bot.on('message', message => {
 						HAIKU;
 			        message.reply(botMessage);
 			        break;
+
+		        //
+		        // Audio
+		        //
 		        case commands.AUDIO_GROUP.PLAY_TRACK.call:
 		        case commands.AUDIO_GROUP.PLAY_TRACK.short:
 		        	var fileName = args[0];
@@ -254,7 +283,7 @@ function playFile(fileAddress, message) {
 	        			voice_handler.dispatcher = dispatcher;
 	        			dispatcher.on("end", end => {
 	        				audioIsReady = true;
-	        				console.log("playQueue.length = " + playQueue.length);
+	        				//console.log("playQueue.length = " + playQueue.length);
 		        			if (playQueue.length > 0) {
 		        				playFile(popFromQueue(), message);
 	        				} else {
