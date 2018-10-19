@@ -279,7 +279,7 @@ function playFile(fileAddress, message) {
     			var _fileAddress = fileAddress.substring(0, fileAddress.indexOf(AUDIO_SUFFIX));
     			_fileAddress = _fileAddress + "1" + AUDIO_SUFFIX;
     			var _fileName = _fileAddress.substring(_fileAddress.lastIndexOf("/")+1, fileAddress.indexOf(AUDIO_SUFFIX));
-    			message.channel.send("(Actually... The correct spelling is " + _fileName + ")");
+    			message.channel.send("(Actually... The correct spelling is " + _fileName + "1" + ")");
 				checkIfFile(_fileAddress, function(_err, _isFile) {
 					if (_isFile) {
 		    			playFileHelper(voiceChannel, _fileAddress);
