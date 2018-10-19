@@ -274,53 +274,67 @@ function playFile(fileAddress, message) {
 		//console.log("PlayFile FileAddress = " + fileAddress);
 		checkIfFile(fileAddress, function(err, isFile) {
 			if (isFile) {
-				if (bot.channel == null) {
-					voiceChannel.join().then(connection => {
-						voice_handler.connection = connection;
-						stopped = false;
-	    				audioIsReady = false;
-	        			const dispatcher = connection.playFile(fileAddress);
-	        			voice_handler.dispatcher = dispatcher;
-	        			dispatcher.on("end", end => {
-	        				audioIsReady = true;
-	        				//console.log("playQueue.length = " + playQueue.length);
-		        			if (playQueue.length > 0) {
-		        				playFile(popFromQueue(), message);
-	        				} else {
-		        				voiceChannel.leave();
-	        					voice_handler.dispatcher = null;
-							}
-	    				});
-					}).catch(err => {
-						message.channel.send(JOIN_CHANNEL_ERROR_MESSAGE);
-						console.log(err)
-					});
-				} else {
-					stopped = false;
-    				audioIsReady = false;
-    				if (voice_handler.connection == null) {
-    					voice_handler.connection = bot.channel;
-    				}
-        			const dispatcher = voice_handler.connection.playFile(fileAddress);
-        			voice_handler.dispatcher = dispatcher;
-        			dispatcher.on("end", end => {
-	        			if (playQueue.length > 0) {
-	        				playFile(popFromQueue(), message);
-        				} else {
-	        				audioIsReady = true;
-	        				voiceChannel.leave();
-	        				voice_handler.dispatcher = null;
-						}
-    				});
-				}
+    			playFileHelper(voiceChannel, fileAddress);
     		} else {
-				//console.log("Is NOT file: " + fileAddress);
-    			message.channel.send("What are these lies?? There is no such file!");
+    			var _fileAddress = fileAddress.substring(0, fileAddress.indexOf(AUDIO_SUFFIX));
+    			_fileAddress = _fileAddress + "1" + AUDIO_SUFFIX;
+    			var _fileName = _fileAddress.substring(_fileAddress.lastIndexOf("/")+1, fileAddress.indexOf(AUDIO_SUFFIX));
+    			message.channel.send("(Actually... The correct spelling is " + _fileName + ")");
+				checkIfFile(_fileAddress, function(_err, _isFile) {
+					if (_isFile) {
+		    			playFileHelper(voiceChannel, _fileAddress);
+		    		} else {
+						//console.log("Is NOT file: " + fileAddress);
+		    			message.channel.send("What are these lies?? There is no such file!");
+	    			}
+    			});
     		}
-		});
+    	});
 	} else {
 		addToQueue(fileAddress);
 		message.channel.send("Track queued, position in queue: " + (playQueue.length));//Please wait a bit, my monkeys are tired.");
+	}
+}
+
+function playFileHelper(voiceChannel, fileAddress) {
+	if (bot.channel == null) {
+		voiceChannel.join().then(connection => {
+			voice_handler.connection = connection;
+			stopped = false;
+			audioIsReady = false;
+			const dispatcher = connection.playFile(fileAddress);
+			voice_handler.dispatcher = dispatcher;
+			dispatcher.on("end", end => {
+				audioIsReady = true;
+				//console.log("playQueue.length = " + playQueue.length);
+    			if (playQueue.length > 0) {
+    				playFile(popFromQueue(), message);
+				} else {
+    				voiceChannel.leave();
+					voice_handler.dispatcher = null;
+				}
+			});
+		}).catch(err => {
+			message.channel.send(JOIN_CHANNEL_ERROR_MESSAGE);
+			console.log(err)
+		});
+	} else {
+		stopped = false;
+		audioIsReady = false;
+		if (voice_handler.connection == null) {
+			voice_handler.connection = bot.channel;
+		}
+		const dispatcher = voice_handler.connection.playFile(fileAddress);
+		voice_handler.dispatcher = dispatcher;
+		dispatcher.on("end", end => {
+			if (playQueue.length > 0) {
+				playFile(popFromQueue(), message);
+			} else {
+				audioIsReady = true;
+				voiceChannel.leave();
+				voice_handler.dispatcher = null;
+			}
+		});
 	}
 }
 
