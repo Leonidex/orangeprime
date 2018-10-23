@@ -2,8 +2,13 @@ const Discord = require('discord.js');
 const auth = require('./auth.json');
 const settings = require('./settings.json');
 const urban_dict = require('./urban-dictionary');
-const fs = require('fs');
+const fs = require('fs')
 //const orange_formatter = require('./formatter.js');
+// YouTube
+const ytdl = require('ytdl.core');
+const request = require('request');
+const getYTID = require('get-youtube-id');
+const fetchVideoInfo = require('yourtube-info');
 
 HAIKU = '```'
 BOLD = '**'
@@ -44,7 +49,8 @@ var commands = {
 		PLAY_RANDOM: {call: 'playrandom', short:'plr', description: "Random tracks, random tracks everywhere."},
 		PLAY_LIST: {call: 'playlist', short: 'pll', description: "Lists available audio tracks."},
 		PLAY_SKIP: {call: 'skip', description: "Skippity skip."},
-		PLAY_STOP: {call: 'stop', description: "Stop. Hammer time."}
+		PLAY_STOP: {call: 'stop', description: "Stop. Hammer time."},
+		YT_PLAY: {call: 'yt', description: "Play tracks from YouTube."},
 	}
 };
 
@@ -62,13 +68,16 @@ MAX_MESSAGE_LENGTH = 2000;
 const bot = new Discord.Client();
 var audioIsReady;
 var playQueue;
+var ytQueue;
 
 bot.on('ready', () => {
 	console.log('Bot is ready!')
 	audioIsReady = true;
 	playQueue = [];
+	ytQueue = [];
 });
 
+///////////////////////////////////// Commands handling /////////////////////////////////////
 bot.on('message', message => {
 	// Are they even talking to me?
 	content = message.content.toLowerCase();
@@ -279,6 +288,8 @@ bot.on('message', message => {
 	        			message.channel.send("There is nothing being played.");
 	        		}
 	        		break;
+        		case commands.AUDIO_GROUP.YT_PLAY.call:
+
 			}
 		} catch (err) {
 			message.channel.send(ERROR_MESSAGE)
@@ -291,6 +302,7 @@ function isAdmin(author) {
 	return author.id == settings.admin_id;
 }
 
+/////////////////////////////////// Local files playing ///////////////////////////////////
 /*
 Plays a file by a given address and the message object.
 */
@@ -399,6 +411,38 @@ function checkIfFile(file, cb) {
   });
 }
 
+///////////////////////////////////// YouTube playing /////////////////////////////////////
+//var config = JSON.parse(fs.readFileSync('./settings.json', 'utf-8'));
+
+const yt_api_key = settings.yt_api_key;
+const bot_controller = settings.bot_controller;
+
+function getID(str, cb) {
+	if (isYouTube(str)) {
+		cb(getYouTubeID(str));
+	} else {
+		searchVideo(str, function(id) {
+			cb(id);
+		});
+	}
+}
+
+function addToQueue(strID) {
+
+}
+
+function searchVideo(query, cb) {
+	request("https://www.gogleapis.com/youtube/v3/search?part=id&type=video&q=" + encodeURICompondent(query) + "&key=" + yt_api_key, function(error, response, body) {
+		var json = JSON.parse(body);
+	    cb(json.items[0].id.videoId);
+	});
+}
+
+function isYouTube(str) {
+	return str.toLowerCase().indexOf("youtube.com") > -1;
+}
+
+///////////////////////////////////// Urban dictionary /////////////////////////////////////
 // Shouldn't be here!
 function format_ud(entry) {
 	message = '\n**Term:**\n' + entry.word + '\n\n'
