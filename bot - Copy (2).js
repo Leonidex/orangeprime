@@ -19,7 +19,6 @@ var commands = {
 		RESTART: {call: 'restart', description: 'Restart the bot.'},
 		PLAY_TRACK: {call: 'aplay', short: 'apl', description: "Plays an audio track to a specific channel"},
 		LEAVE: {call: 'leave', description: 'Makes the bot leave the voice channel.'},
-		LIST_VOICE_CHANNELS: {call: 'listvc', description: 'Lists the voice channels in the guild(server).'},
 	},
 
 	UTIL_GROUP: {
@@ -85,47 +84,44 @@ bot.on('message', message => {
 			var cmd = args[CMD_INDEX];
 
 			args = args.splice(ARGS_INDEX);
-			
-			//
-			// Admin
-			//
-			if (isAdmin(message.author)) {
-				switch(cmd) {
+
+			switch(cmd) {
+				//
+				// Admin
+				//
 				case commands.ADMIN_GROUP.RESTART.call:
 					// No implementation yet
+					if (isAdmin(message.author)) {
+						
+					}
 					break;
 				case commands.ADMIN_GROUP.PLAY_TRACK.call:
 				case commands.ADMIN_GROUP.PLAY_TRACK.short:
-					var channel_num = args[0];
-					var msg_text = args[1];
-					var channels = message.guild.channels.filter(x => x.type === "voice").array();
-					var fileAddress = getFileAddressFromFileName(msg_text);
-					console.log(msg_text);
-					if (channel_num >= 0 && channel_num <= channels.length) {
-						playFile(channels[channel_num], fileAddress, message);
-					} else {
-						console.log(channel_num, channels.length);
+					if (isAdmin(message.author)) {
+						var channel_num = args[0];
+						var msg = args[1];
+						var channels = message.guild.channels.filter(x => x.type === "voice").array();
+						console.log("***********************************************************\
+							***********************************************************\
+							***********************************************************\
+							***********************************************************");
+						console.log(typeof(channels));
+						if (channel_num >= 0 && channel_num <= channels.length) {
+							playFileHelper(channels[channel_num], msg);
+						} else {
+							console.log(channel_num, channels.length);
+						}
 					}
 					break;
 				case commands.ADMIN_GROUP.LEAVE.call:
-					if (bot.channel != null) {
-						bot.channel.leave();
-					} else {
-			        	message.channel.send(NOT_IN_CHANNEL_MESSAGE);
+				break;
+					if (isAdmin(message.author)) {
+						if (bot.channel != null) {
+							bot.channel.leave();
+						} else {
+				        	message.channel.send(NOT_IN_CHANNEL_MESSAGE);
+						}
 					}
-					break;
-				case commands.ADMIN_GROUP.LIST_VOICE_CHANNELS.call:
-					var botMessage = "";
-					var channels = message.guild.channels.filter(x => x.type === "voice").array();
-					for (var i = 0; i < channels.length; i++) {
-						botMessage += i + ":" + channels[i].name + "\n";
-					}
-					message.channel.send(botMessage);
-					break;
-				}
-			}
-
-			switch(cmd) {
 				//
 				// Utility
 				//
@@ -227,8 +223,8 @@ bot.on('message', message => {
 		        case commands.AUDIO_GROUP.PLAY_TRACK.call:
 		        case commands.AUDIO_GROUP.PLAY_TRACK.short:
 		        	var fileName = args[0];
-		        	var fileAddress = getFileAddressFromFileName(msg_text);
-	        		playFile(message.member.voiceChannel, fileAddress, message);
+		        	var fileAddress = AUDIO_FOLDER_ADDRESS + fileName + AUDIO_SUFFIX;
+	        		playFile(message.member.voiceChannel, fileAddress);
 		        	break;
         		case commands.AUDIO_GROUP.PLAY_RANDOM.call:
         		case commands.AUDIO_GROUP.PLAY_RANDOM.short:
@@ -236,8 +232,7 @@ bot.on('message', message => {
 	        		fs.readdir(AUDIO_FOLDER_ADDRESS, function(err, items) {
 	        			randomIndex = Math.floor(Math.random() * items.length);
 		        		var fileAddress = AUDIO_FOLDER_ADDRESS + items[randomIndex];
-		        		//console.log(message.member.voiceChannel);
-	        			playFile(message.member.voiceChannel, fileAddress, message);
+	        			playFile(message.member.voiceChannel, fileAddress);
 	        		});
 	        		break;
 	        	case commands.AUDIO_GROUP.PLAY_LIST.call:
@@ -290,7 +285,7 @@ bot.on('message', message => {
 	        			voice_handler.dispatcher.end();
 	        			voice_handler.dispatcher = null;
 	        			if (playQueue.length > 0) {
-	        				playFile(message.member.voiceChannel, popFromQueue(), message);
+	        				playFile(message.member.voiceChannel, popFromQueue());
 	        			} else {
 	        				stopped = true;
 	        			}
@@ -313,24 +308,21 @@ function isAdmin(author) {
 /*
 Plays a file by a given address and the message object.
 */
-function playFile(voiceChannel, fileAddress, message) {
+function playFile(voiceChannel, fileAddress) {
 	if (audioIsReady) {
 		//console.log("PlayFile FileAddress = " + fileAddress);
 		checkIfFile(fileAddress, function(err, isFile) {
 			if (isFile) {
-				console.log("is file");
-    			playFileHelper(voiceChannel, fileAddress, message);
+    			playFileHelper(voiceChannel, fileAddress);
     		} else {
     			var _fileAddress = fileAddress.substring(0, fileAddress.indexOf(AUDIO_SUFFIX));
     			_fileAddress = _fileAddress + "1" + AUDIO_SUFFIX;
-    			var _fileName = getFileNameFromFileAddress(_fileAddress);
+    			var _fileName = getFileName(_fileAddress);
 				checkIfFile(_fileAddress, function(_err, _isFile) {
 					if (_isFile) {
     					message.channel.send(CORRECT_SPELLING_MESSAGE + _fileName + ")");
-		    			playFileHelper(voiceChannel, _fileAddress, message);
+		    			playFileHelper(voiceChannel, _fileAddress);
 		    		} else {
-		    			console.log(fileAddress);
-		    			console.log(_fileName);
 						//console.log("Is NOT file: " + fileAddress);
 		    			message.channel.send("What are these lies?? There is no such file!");
 	    			}
@@ -343,23 +335,20 @@ function playFile(voiceChannel, fileAddress, message) {
 	}
 }
 
-function playFileHelper(voiceChannel, fileAddress, message) {
+function playFileHelper(voiceChannel, fileAddress) {
 	if (bot.channel == null) {
-		console.log("bot.channel == null");
 		voiceChannel.join().then(connection => {
 			voice_handler.connection = connection;
 			stopped = false;
 			audioIsReady = false;
-			const dispatcher = connection.playFile(fileAddress);
-			bot.user.setGame(getFileNameFromFileAddress(fileAddress));
+			const dispatcher = connection.playFile(voiceChannel, fileAddress);
+			bot.user.setGame(getFileName(fileAddress));
 			voice_handler.dispatcher = dispatcher;
-			console.log("voiceChannel.join().then(connection => {");
 			dispatcher.on("end", end => {
-				console.log("dispatcher.on(... end => {");
 				audioIsReady = true;
 				//console.log("playQueue.length = " + playQueue.length);
     			if (playQueue.length > 0) {
-    				playFile(voiceChannel, popFromQueue(), message);
+    				playFile(message.member.voiceChannel, popFromQueue());
 				} else {
     				voiceChannel.leave();
 					voice_handler.dispatcher = null;
@@ -367,12 +356,12 @@ function playFileHelper(voiceChannel, fileAddress, message) {
 				}
 			});
 		}).catch(err => {
-			/*try {
+			try {
 				console.log(err);
 				//message.channel.send(JOIN_CHANNEL_ERROR_MESSAGE);
 			} catch (e) {
 				console.log(e);
-			}*/
+			}
 		});
 	} else {
 		stopped = false;
@@ -380,11 +369,11 @@ function playFileHelper(voiceChannel, fileAddress, message) {
 		if (voice_handler.connection == null) {
 			voice_handler.connection = bot.channel;
 		}
-		const dispatcher = voice_handler.connection.playFile(fileAddress);
+		const dispatcher = voice_handler.connection.playFile(voiceChannel, fileAddress);
 		voice_handler.dispatcher = dispatcher;
 		dispatcher.on("end", end => {
 			if (playQueue.length > 0) {
-				playFile(voiceChannel, popFromQueue(), message);
+				playFile(message.member.voiceChannel, popFromQueue());
 			} else {
 				audioIsReady = true;
 				voiceChannel.leave();
@@ -394,12 +383,8 @@ function playFileHelper(voiceChannel, fileAddress, message) {
 	}
 }
 
-function getFileNameFromFileAddress(fileAddress) {
+function getFileName(fileAddress) {
 	return fileAddress.substring(fileAddress.lastIndexOf("/")+1, fileAddress.indexOf(AUDIO_SUFFIX));
-}
-
-function getFileAddressFromFileName(fileName) {
-	return AUDIO_FOLDER_ADDRESS + fileName + AUDIO_SUFFIX;
 }
 
 /* 
