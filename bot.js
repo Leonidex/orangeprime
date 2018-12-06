@@ -100,11 +100,8 @@ bot.on('message', message => {
 					var msg_text = args[1];
 					var channels = message.guild.channels.filter(x => x.type === "voice").array();
 					var fileAddress = getFileAddressFromFileName(msg_text);
-					//console.log(msg_text);
 					if (channel_num >= 0 && channel_num <= channels.length) {
 						playFile(channels[channel_num], fileAddress, message);
-					} else {
-						//console.log(channel_num, channels.length);
 					}
 					break;
 				case commands.ADMIN_GROUP.LEAVE.call:
@@ -228,7 +225,6 @@ bot.on('message', message => {
 		        case commands.AUDIO_GROUP.PLAY_TRACK.short:
 		        	var fileName = args[0];
 		        	var fileAddress = getFileAddressFromFileName(fileName);
-		        	//console.log("commands.AUDIO_GROUP.PLAY_TRACK.short, fileAddress=" + fileAddress + " fileName=" + fileName);
 	        		playFile(message.member.voiceChannel, fileAddress, message);
 		        	break;
         		case commands.AUDIO_GROUP.PLAY_RANDOM.call:
@@ -237,7 +233,6 @@ bot.on('message', message => {
 	        		fs.readdir(AUDIO_FOLDER_ADDRESS, function(err, items) {
 	        			randomIndex = Math.floor(Math.random() * items.length);
 		        		var fileAddress = AUDIO_FOLDER_ADDRESS + items[randomIndex];
-		        		//console.log(message.member.voiceChannel);
 	        			playFile(message.member.voiceChannel, fileAddress, message);
 	        		});
 	        		break;
@@ -269,7 +264,6 @@ bot.on('message', message => {
 	        			items_list[list_index] += "."
 
 	        			for (i=0; i<=list_index; i++) {
-        					//console.log(items_list[i]);
 	        				message.channel.send(items_list[i]);
 	        			}
 	        		});
@@ -316,10 +310,8 @@ Plays a file by a given address and the message object.
 */
 function playFile(voiceChannel, fileAddress, message) {
 	if (audioIsReady) {
-		//console.log("PlayFile FileAddress = " + fileAddress);
 		checkIfFile(fileAddress, function(err, isFile) {
 			if (isFile) {
-				//console.log("is file");
     			playFileHelper(voiceChannel, fileAddress, message);
     		} else {
     			var _fileAddress = fileAddress.substring(0, fileAddress.indexOf(AUDIO_SUFFIX));
@@ -330,9 +322,6 @@ function playFile(voiceChannel, fileAddress, message) {
     					message.channel.send(CORRECT_SPELLING_MESSAGE + _fileName + ")");
 		    			playFileHelper(voiceChannel, _fileAddress, message);
 		    		} else {
-		    			//console.log(fileAddress);
-		    			//console.log(_fileName);
-						//console.log("Is NOT file: " + fileAddress);
 		    			message.channel.send("What are these lies?? There is no such file!");
 	    			}
     			});
@@ -346,7 +335,6 @@ function playFile(voiceChannel, fileAddress, message) {
 
 function playFileHelper(voiceChannel, fileAddress, message) {
 	if (bot.channel == null) {
-		//console.log("bot.channel == null");
 		voiceChannel.join().then(connection => {
 			voice_handler.connection = connection;
 			stopped = false;
@@ -354,11 +342,8 @@ function playFileHelper(voiceChannel, fileAddress, message) {
 			const dispatcher = connection.playFile(fileAddress);
 			bot.user.setGame(getFileNameFromFileAddress(fileAddress));
 			voice_handler.dispatcher = dispatcher;
-			//console.log("voiceChannel.join().then(connection => {");
 			dispatcher.on("end", end => {
-				//console.log("dispatcher.on(... end => {");
 				audioIsReady = true;
-				//console.log("playQueue.length = " + playQueue.length);
     			if (playQueue.length > 0) {
     				playFile(voiceChannel, popFromQueue(), message);
 				} else {
@@ -367,13 +352,6 @@ function playFileHelper(voiceChannel, fileAddress, message) {
 					bot.user.setGame(null);
 				}
 			});
-		}).catch(err => {
-			/*try {
-				console.log(err);
-				//message.channel.send(JOIN_CHANNEL_ERROR_MESSAGE);
-			} catch (e) {
-				console.log(e);
-			}*/
 		});
 	} else {
 		stopped = false;
@@ -416,7 +394,6 @@ and orders the queue.
  */
 function popFromQueue() {
 	fileAddress = playQueue[0]
-	//console.log("File Address = " + fileAddress);
 	for (i=0; i<playQueue.length; i++) {
 		playQueue[i] = playQueue[i+1];
 	}
