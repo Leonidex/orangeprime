@@ -20,6 +20,7 @@ var commands = {
 		PLAY_TRACK: {call: 'aplay', short: 'apl', description: "Plays an audio track to a specific channel"},
 		LEAVE: {call: 'leave', description: 'Makes the bot leave the voice channel.'},
 		LIST_VOICE_CHANNELS: {call: 'listvc', description: 'Lists the voice channels in the guild(server).'},
+		SAY: {call: 'say', description: 'Makes the bot say something.'},
 	},
 
 	UTIL_GROUP: {
@@ -79,224 +80,237 @@ bot.on('ready', () => {
 bot.on('message', message => {
 	// Are they even talking to me?
 	content = message.content.toLowerCase();
-	if (content.substring(0, settings.prefix.length) == settings.prefix) {
-		try {
-			var args = content.substring(settings.prefix.length).split(' ');
-			var cmd = args[CMD_INDEX];
+	if (message.channel.type == "text") {
+		if (content.substring(0, settings.prefix.length) == settings.prefix) {
+			try {
+				var args = content.substring(settings.prefix.length).split(' ');
+				var cmd = args[CMD_INDEX];
 
-			args = args.splice(ARGS_INDEX);
-			
-			//
-			// Admin
-			//
-			if (isAdmin(message.author)) {
-				switch(cmd) {
-				case commands.ADMIN_GROUP.RESTART.call:
-					// No implementation yet
-					break;
-				case commands.ADMIN_GROUP.PLAY_TRACK.call:
-				case commands.ADMIN_GROUP.PLAY_TRACK.short:
-					var channel_num = args[0];
-					var msg_text = args[1];
-					var channels = message.guild.channels.filter(x => x.type === "voice").array();
-					var fileAddress = getFileAddressFromFileName(msg_text);
-					if (channel_num >= 0 && channel_num <= channels.length) {
-						playFile(channels[channel_num], fileAddress, message);
-					}
-					break;
-				case commands.ADMIN_GROUP.LEAVE.call:
-					if (bot.channel != null) {
-						bot.channel.leave();
-					} else {
-			        	message.channel.send(NOT_IN_CHANNEL_MESSAGE);
-					}
-					break;
-				case commands.ADMIN_GROUP.LIST_VOICE_CHANNELS.call:
-					var botMessage = "";
-					var channels = message.guild.channels.filter(x => x.type === "voice").array();
-					for (var i = 0; i < channels.length; i++) {
-						botMessage += i + ":" + channels[i].name + "\n";
-					}
-					message.channel.send(botMessage);
-					break;
-				}
-			}
-
-			switch(cmd) {
+				args = args.splice(ARGS_INDEX);
+				/*console.log(args);
+				console.log(message);*/
 				//
-				// Utility
+				// Admin
 				//
-				case commands.UTIL_GROUP.HELP.call:
-				    botMessage = ''
-
-					for (group in commands) {
-						if (group == "ADMIN_GROUP") {	// Skip the admin commands.
-							continue;
-						} else {	// Add all commands into the botMessage string.
-					    	Object.keys(commands[group]).forEach(cmdObj => {
-						    	botMessage += '\n' + "[" + commands[group][cmdObj].call + "]";
-						    	if (commands[group][cmdObj].short) {
-						    		botMessage += '/' + "[" + commands[group][cmdObj].short + "]";
-						    	}
-						    	botMessage += ': ' + commands[group][cmdObj].description;
-						    });
-
-						    botMessage +="\n";
+				if (isAdmin(message.author)) {
+					switch(cmd) {
+					case commands.ADMIN_GROUP.RESTART.call:
+						// No implementation yet
+						break;
+					case commands.ADMIN_GROUP.PLAY_TRACK.call:
+					case commands.ADMIN_GROUP.PLAY_TRACK.short:
+						var channel_num = args[0];
+						var msg_text = args[1];
+						var channels = message.guild.channels.filter(x => x.type === "voice").array();
+						var fileAddress = getFileAddressFromFileName(msg_text);
+						//console.log(msg_text);
+						if (channel_num >= 0 && channel_num <= channels.length) {
+							playFile(channels[channel_num], fileAddress, message);
+						} else {
+							//console.log(channel_num, channels.length);
 						}
-				    }
-				    
-					message.channel.send(BOLD + 'The available commands are:' + BOLD
-						 + "\n" + HAIKU + "ini\n" + botMessage
-						 + "\n" + "[Call me by '"+ settings.prefix + "command']" + HAIKU);
-					break;
-				// Ping
-				case commands.UTIL_GROUP.PING.call:
-				    message.reply('Pong!');
-					break;
+						break;
+					case commands.ADMIN_GROUP.LEAVE.call:
+						if (bot.channel != null) {
+							bot.channel.leave();
+						} else {
+				        	message.channel.send(NOT_IN_CHANNEL_MESSAGE);
+						}
+						break;
+					case commands.ADMIN_GROUP.LIST_VOICE_CHANNELS.call:
+						var botMessage = "";
+						var channels = message.guild.channels.filter(x => x.type === "voice").array();
+						for (var i = 0; i < channels.length; i++) {
+							botMessage += i + ":" + channels[i].name + "\n";
+						}
+						message.channel.send(botMessage);
+						break;
+					case commands.ADMIN_GROUP.SAY.call:
+						var msg_text = args[0];
+						window.speechSynthesis.speak(new SpeechSynthesisUtterance(msg_text));
+						break;
+					}
+				}
 
-				//	
-				// Urban dictionary
-				//
-				case commands.UD_GROUP.URBAN_DICT.call:
-				case commands.UD_GROUP.URBAN_DICT.short:
-				    botMessage = ''
-				    term = args[0]
-				    entry_index = args[1]
-				    if (!Number.isInteger(entry_index) || entry_index < 0) {
-				        entry_index = 0
-				    }
-				    urban_dict.term(term, function(error, entries, tags, sounds) {
-				        if (error) {
-				            botMessage = "Error: " + error.message
-				        } else {
-				            botMessage = format_ud(entries[entry_index]);
-				        }
-				        message.channel.send(botMessage);
-				    })
-					break;
-				case commands.UD_GROUP.URBAN_DICT_RANDOM.call:
-				case commands.UD_GROUP.URBAN_DICT_RANDOM.short:
-				    botMessage = ''
-				    urban_dict.random(function(error, entry) {
-				        if (error) {
-				            botMessage += error.message
-				        } else {
-				            botMessage = format_ud(entry);
-				        }
-				        message.channel.send(botMessage);
-				    })
-					break;
+				switch(cmd) {
+					//
+					// Utility
+					//
+					case commands.UTIL_GROUP.HELP.call:
+					    botMessage = ''
 
-				//
-				// Misc
-				//
-				case commands.MISC_GROUP.COFFEE.call:
-					botMessage = HAIKU +
-						'\n' + '                        (' +
-						'\n' + '                          )     (' +
-						'\n' + '                   ___...(-------)-....___' +
-						'\n' + '               .-..       )    (          ..-.' +
-						'\n' + '         .-.``.|-._             )         _.-|' +
-						'\n' + '        |  .--.|   `..---...........---..`   |' +
-						'\n' + '       |  |    |                             |' +
-						'\n' + '       |  |    |                             |' +
-						'\n' + '        |  |   |                             |' +
-						'\n' + '         `| `| |                             |' +
-						'\n' + '           `| `|                             |' +
-						'\n' + '           _| ||                             |' +
-						'\n' + '          (__|  |                           |' +
-						'\n' + '       _..---..` |                         |`..---.._' +
-						'\n' + '    .-.           |                       |          .-.' +
-						'\n' + '   :               `-.__             __.-.              :' +
-						'\n' + '   :                  ) ..---...---.. (                 :' +
-						'\n' + '    .._               `.--...___...--.`              _..' +
-						'\n' + '      |..--..__                              __..--..|' +
-						'\n' + '       .._     ...----.....______.....----...     _..' +
-						'\n' + '          `..--..,,_____            _____,,..--..`' +
-						'\n' + '                        `...----...' +
-						HAIKU;
-			        message.reply(botMessage);
-			        break;
+						for (group in commands) {
+							if (group == "ADMIN_GROUP") {	// Skip the admin commands.
+								continue;
+							} else {	// Add all commands into the botMessage string.
+						    	Object.keys(commands[group]).forEach(cmdObj => {
+							    	botMessage += '\n' + "[" + commands[group][cmdObj].call + "]";
+							    	if (commands[group][cmdObj].short) {
+							    		botMessage += '/' + "[" + commands[group][cmdObj].short + "]";
+							    	}
+							    	botMessage += ': ' + commands[group][cmdObj].description;
+							    });
 
-		        //
-		        // Audio
-		        //
-		        case commands.AUDIO_GROUP.PLAY_TRACK.call:
-		        case commands.AUDIO_GROUP.PLAY_TRACK.short:
-		        	var fileName = args[0];
-		        	var fileAddress = getFileAddressFromFileName(fileName);
-	        		playFile(message.member.voiceChannel, fileAddress, message);
-		        	break;
-        		case commands.AUDIO_GROUP.PLAY_RANDOM.call:
-        		case commands.AUDIO_GROUP.PLAY_RANDOM.short:
-        			var items_list = [];
-	        		fs.readdir(AUDIO_FOLDER_ADDRESS, function(err, items) {
-	        			randomIndex = Math.floor(Math.random() * items.length);
-		        		var fileAddress = AUDIO_FOLDER_ADDRESS + items[randomIndex];
-	        			playFile(message.member.voiceChannel, fileAddress, message);
-	        		});
-	        		break;
-	        	case commands.AUDIO_GROUP.PLAY_LIST.call:
-	        	case commands.AUDIO_GROUP.PLAY_LIST.short:
-	        		list_index = 0;	// Advances when the list is too long.
-	        		var items_list = [];
-	        		items_list[list_index] = BOLD + 'Available audio files:\n\n' + BOLD;
-	        		var prefix = '';
-	        		var addition = '';
+							    botMessage +="\n";
+							}
+					    }
+					    
+						message.channel.send(BOLD + 'The available commands are:' + BOLD
+							 + "\n" + HAIKU + "ini\n" + botMessage
+							 + "\n" + "[Call me by '"+ settings.prefix + "command']" + HAIKU);
+						break;
+					// Ping
+					case commands.UTIL_GROUP.PING.call:
+					    message.reply('Pong!');
+						break;
 
-	        		fs.readdir(AUDIO_FOLDER_ADDRESS, function(err, items) {
-	        			for (var i=0; i<items.length; i++) {
-	        				var fileName = items[i].substring(0, items[i].lastIndexOf('.'));
-	        				if (prefix.toUpperCase() == items[i][0].toUpperCase()) {
-	        					addition = ", " + fileName;
-	        				} else {
-	        					prefix = items[i][0];
-	        					addition = ".\n\n" + items[i][0].toUpperCase() + ": \n" + fileName;
-	        				}
+					//	
+					// Urban dictionary
+					//
+					case commands.UD_GROUP.URBAN_DICT.call:
+					case commands.UD_GROUP.URBAN_DICT.short:
+					    botMessage = ''
+					    term = args[0]
+					    entry_index = args[1]
+					    if (!Number.isInteger(entry_index) || entry_index < 0) {
+					        entry_index = 0
+					    }
+					    urban_dict.term(term, function(error, entries, tags, sounds) {
+					        if (error) {
+					            botMessage = "Error: " + error.message
+					        } else {
+					            botMessage = format_ud(entries[entry_index]);
+					        }
+					        message.channel.send(botMessage);
+					    })
+						break;
+					case commands.UD_GROUP.URBAN_DICT_RANDOM.call:
+					case commands.UD_GROUP.URBAN_DICT_RANDOM.short:
+					    botMessage = ''
+					    urban_dict.random(function(error, entry) {
+					        if (error) {
+					            botMessage += error.message
+					        } else {
+					            botMessage = format_ud(entry);
+					        }
+					        message.channel.send(botMessage);
+					    })
+						break;
 
-	        				if ((items_list[list_index] + addition).length > MAX_MESSAGE_LENGTH) {
-	        					list_index++;
-	        					items_list[list_index] = '';
-	        				}
+					//
+					// Misc
+					//
+					case commands.MISC_GROUP.COFFEE.call:
+						botMessage = HAIKU +
+							'\n' + '                        (' +
+							'\n' + '                          )     (' +
+							'\n' + '                   ___...(-------)-....___' +
+							'\n' + '               .-..       )    (          ..-.' +
+							'\n' + '         .-.``.|-._             )         _.-|' +
+							'\n' + '        |  .--.|   `..---...........---..`   |' +
+							'\n' + '       |  |    |                             |' +
+							'\n' + '       |  |    |                             |' +
+							'\n' + '        |  |   |                             |' +
+							'\n' + '         `| `| |                             |' +
+							'\n' + '           `| `|                             |' +
+							'\n' + '           _| ||                             |' +
+							'\n' + '          (__|  |                           |' +
+							'\n' + '       _..---..` |                         |`..---.._' +
+							'\n' + '    .-.           |                       |          .-.' +
+							'\n' + '   :               `-.__             __.-.              :' +
+							'\n' + '   :                  ) ..---...---.. (                 :' +
+							'\n' + '    .._               `.--...___...--.`              _..' +
+							'\n' + '      |..--..__                              __..--..|' +
+							'\n' + '       .._     ...----.....______.....----...     _..' +
+							'\n' + '          `..--..,,_____            _____,,..--..`' +
+							'\n' + '                        `...----...' +
+							HAIKU;
+				        message.reply(botMessage);
+				        break;
 
-	        				items_list[list_index] += addition;
-	        			}
-	        			items_list[list_index] += "."
+			        //
+			        // Audio
+			        //
+			        case commands.AUDIO_GROUP.PLAY_TRACK.call:
+			        case commands.AUDIO_GROUP.PLAY_TRACK.short:
+			        	var fileName = args[0];
+			        	var fileAddress = getFileAddressFromFileName(fileName);
+			        	//console.log("commands.AUDIO_GROUP.PLAY_TRACK.short, fileAddress=" + fileAddress + " fileName=" + fileName);
+		        		playFile(message.member.voiceChannel, fileAddress, message);
+			        	break;
+	        		case commands.AUDIO_GROUP.PLAY_RANDOM.call:
+	        		case commands.AUDIO_GROUP.PLAY_RANDOM.short:
+	        			var items_list = [];
+		        		fs.readdir(AUDIO_FOLDER_ADDRESS, function(err, items) {
+		        			randomIndex = Math.floor(Math.random() * items.length);
+			        		var fileAddress = AUDIO_FOLDER_ADDRESS + items[randomIndex];
+			        		//console.log(message.member.voiceChannel);
+		        			playFile(message.member.voiceChannel, fileAddress, message);
+		        		});
+		        		break;
+		        	case commands.AUDIO_GROUP.PLAY_LIST.call:
+		        	case commands.AUDIO_GROUP.PLAY_LIST.short:
+		        		list_index = 0;	// Advances when the list is too long.
+		        		var items_list = [];
+		        		items_list[list_index] = BOLD + 'Available audio files:\n\n' + BOLD;
+		        		var prefix = '';
+		        		var addition = '';
 
-	        			for (i=0; i<=list_index; i++) {
-	        				message.channel.send(items_list[i]);
-	        			}
-	        		});
-	        		break;
-	        	case commands.AUDIO_GROUP.PLAY_STOP.call:
-	        		if (stopped) {
-	        			message.channel.send(PLAYBACK_ALREADY_STOPPED_MESSAGE);
-	        		} else {
-	        			stopped = true;
-	        			playQueue = []
+		        		fs.readdir(AUDIO_FOLDER_ADDRESS, function(err, items) {
+		        			for (var i=0; i<items.length; i++) {
+		        				var fileName = items[i].substring(0, items[i].lastIndexOf('.'));
+		        				if (prefix.toUpperCase() == items[i][0].toUpperCase()) {
+		        					addition = ", " + fileName;
+		        				} else {
+		        					prefix = items[i][0];
+		        					addition = ".\n\n" + items[i][0].toUpperCase() + ": \n" + fileName;
+		        				}
+
+		        				if ((items_list[list_index] + addition).length > MAX_MESSAGE_LENGTH) {
+		        					list_index++;
+		        					items_list[list_index] = '';
+		        				}
+
+		        				items_list[list_index] += addition;
+		        			}
+		        			items_list[list_index] += "."
+
+		        			for (i=0; i<=list_index; i++) {
+	        					//console.log(items_list[i]);
+		        				message.channel.send(items_list[i]);
+		        			}
+		        		});
+		        		break;
+		        	case commands.AUDIO_GROUP.PLAY_STOP.call:
+		        		if (stopped) {
+		        			message.channel.send(PLAYBACK_ALREADY_STOPPED_MESSAGE);
+		        		} else {
+		        			stopped = true;
+		        			playQueue = []
+			        		if (voice_handler.dispatcher != null) {
+			        			voice_handler.dispatcher.end();
+		        				voice_handler.dispatcher = null;
+			        		}
+		        		}
+		        		break;
+		        	case commands.AUDIO_GROUP.PLAY_SKIP.call:
 		        		if (voice_handler.dispatcher != null) {
 		        			voice_handler.dispatcher.end();
-	        				voice_handler.dispatcher = null;
+		        			voice_handler.dispatcher = null;
+		        			if (playQueue.length > 0) {
+		        				playFile(message.member.voiceChannel, popFromQueue(), message);
+		        			} else {
+		        				stopped = true;
+		        			}
+		        		} else {
+		        			message.channel.send(NOTHING_TO_BE_PLAYED_MESSAGE);
 		        		}
-	        		}
-	        		break;
-	        	case commands.AUDIO_GROUP.PLAY_SKIP.call:
-	        		if (voice_handler.dispatcher != null) {
-	        			voice_handler.dispatcher.end();
-	        			voice_handler.dispatcher = null;
-	        			if (playQueue.length > 0) {
-	        				playFile(message.member.voiceChannel, popFromQueue(), message);
-	        			} else {
-	        				stopped = true;
-	        			}
-	        		} else {
-	        			message.channel.send(NOTHING_TO_BE_PLAYED_MESSAGE);
-	        		}
-	        		break;
+		        		break;
+				}
+			} catch (err) {
+				message.channel.send(ERROR_MESSAGE)
+				console.log(err);
 			}
-		} catch (err) {
-			message.channel.send(ERROR_MESSAGE)
-			console.log(err);
 		}
 	}
 });
@@ -310,8 +324,10 @@ Plays a file by a given address and the message object.
 */
 function playFile(voiceChannel, fileAddress, message) {
 	if (audioIsReady) {
+		//console.log("PlayFile FileAddress = " + fileAddress);
 		checkIfFile(fileAddress, function(err, isFile) {
 			if (isFile) {
+				//console.log("is file");
     			playFileHelper(voiceChannel, fileAddress, message);
     		} else {
     			var _fileAddress = fileAddress.substring(0, fileAddress.indexOf(AUDIO_SUFFIX));
@@ -322,6 +338,9 @@ function playFile(voiceChannel, fileAddress, message) {
     					message.channel.send(CORRECT_SPELLING_MESSAGE + _fileName + ")");
 		    			playFileHelper(voiceChannel, _fileAddress, message);
 		    		} else {
+		    			//console.log(fileAddress);
+		    			//console.log(_fileName);
+						//console.log("Is NOT file: " + fileAddress);
 		    			message.channel.send("What are these lies?? There is no such file!");
 	    			}
     			});
@@ -335,6 +354,7 @@ function playFile(voiceChannel, fileAddress, message) {
 
 function playFileHelper(voiceChannel, fileAddress, message) {
 	if (bot.channel == null) {
+		//console.log("bot.channel == null");
 		voiceChannel.join().then(connection => {
 			voice_handler.connection = connection;
 			stopped = false;
@@ -342,8 +362,11 @@ function playFileHelper(voiceChannel, fileAddress, message) {
 			const dispatcher = connection.playFile(fileAddress);
 			bot.user.setGame(getFileNameFromFileAddress(fileAddress));
 			voice_handler.dispatcher = dispatcher;
+			//console.log("voiceChannel.join().then(connection => {");
 			dispatcher.on("end", end => {
+				//console.log("dispatcher.on(... end => {");
 				audioIsReady = true;
+				//console.log("playQueue.length = " + playQueue.length);
     			if (playQueue.length > 0) {
     				playFile(voiceChannel, popFromQueue(), message);
 				} else {
@@ -352,6 +375,13 @@ function playFileHelper(voiceChannel, fileAddress, message) {
 					bot.user.setGame(null);
 				}
 			});
+		}).catch(err => {
+			/*try {
+				console.log(err);
+				//message.channel.send(JOIN_CHANNEL_ERROR_MESSAGE);
+			} catch (e) {
+				console.log(e);
+			}*/
 		});
 	} else {
 		stopped = false;
@@ -394,6 +424,7 @@ and orders the queue.
  */
 function popFromQueue() {
 	fileAddress = playQueue[0]
+	//console.log("File Address = " + fileAddress);
 	for (i=0; i<playQueue.length; i++) {
 		playQueue[i] = playQueue[i+1];
 	}
