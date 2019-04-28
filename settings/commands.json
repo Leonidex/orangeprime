@@ -1,0 +1,86 @@
+{
+    "ADMIN_GROUP": {
+        "RESTART": {
+            "call": "restart",
+            "description": "Restart the bot."
+        },
+        "PLAY_TRACK": {
+            "call": "aplay",
+            "short": "apl",
+            "description": "Plays an audio track to a specific channel."
+        },
+        "LEAVE": {
+            "call": "leave",
+            "description": "Makes the bot leave the voice channel."
+        },
+        "LIST_VOICE_CHANNELS": {
+            "call": "listvc",
+            "description": "Lists the voice channels in the guild(server)."
+        },
+        "SAY": {
+            "call": "asay",
+            "description": "Makes the bot say something in a specific channel."
+        }
+    },
+    "UTIL_GROUP": {
+        "HELP": {
+            "call": "help",
+            "description": "Get the list of available commands."
+        },
+        "PING": {
+            "call": "ping",
+            "description": "Ping!"
+        },
+        "CHING": {
+            "call": "ching",
+            "description": "Ching!"
+        }
+    },
+    "UD_GROUP": {
+        "URBAN_DICT": {
+            "call": "urban",
+            "short": "ud",
+            "description": "Urban Dictionary search."
+        },
+        "URBAN_DICT_RANDOM": {
+            "call": "urbanr",
+            "short": "udr",
+            "description": "Urban Dictionary random article."
+        }
+    },
+    "MISC_GROUP": {
+        "COFFEE": {
+            "call": "coffee",
+            "description": "One hot beverage coming up."
+        }
+    },
+    "AUDIO_GROUP": {
+        "PLAY_TRACK": {
+            "call": "play",
+            "short": "pl",
+            "description": "Plays an audio track."
+        },
+        "PLAY_RANDOM": {
+            "call": "playrandom",
+            "short": "plr",
+            "description": "Random tracks, random tracks everywhere."
+        },
+        "PLAY_LIST": {
+            "call": "playlist",
+            "short": "pll",
+            "description": "Lists available audio tracks."
+        },
+        "PLAY_SKIP": {
+            "call": "skip",
+            "description": "Skippity skip."
+        },
+        "PLAY_STOP": {
+            "call": "stop",
+            "description": "Stop. Hammer time."
+        },
+        "SAY": {
+            "call": "say",
+            "description": "Makes the bot say something."
+        }
+    }
+}

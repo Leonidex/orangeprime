@@ -1,0 +1,34 @@
+{
+	"_PREFIX": "-",
+	"IDS": {
+		"ADMIN_ID": {your discord id},
+		"BOT_ID": {your bot's id}
+	},
+	"FORMATTING": {
+		"HAIKU": "```",
+		"BOLD": "**"
+	},
+	"INDICES": {
+		"CMD_INDEX": 0,
+		"ARGS_INDEX": 1
+	},
+	"MESSAGES": {
+		"MAX_MESSAGE_LENGTH": 2000,
+		"ERROR_MESSAGE": "Oops, something went wrong.",
+		"JOIN_CHANNEL_ERROR_MESSAGE": "Seems like I cannot join the channel :(",
+		"NOT_IN_CHANNEL_MESSAGE": "I'm not in a voice channel!",
+		"TRACK_QUEUED_MESSAGE": "Track queued, position in queue: ",
+		"CORRECT_SPELLING_MESSAGE": "(Actually... The correct spelling is ",
+		"PLAYBACK_ALREADY_STOPPED_MESSAGE": "Playback is already stopped.",
+		"NOTHING_TO_BE_PLAYED_MESSAGE": "There is nothing being played.",
+		"INVALID_CHANNEL_NUM_MESSAGE": "There is no such channel.",
+		"COFFEE": "\n                         ( \t \t\n                           )     ( \t \t\n                    ___...(-------)-....___ \t \t\n                .-..       )    (          ..-. \t \t\n          .-.``.|-._             )         _.-| \t \t\n         |  .--.|   `..---...........---..`   | \t \t\n        |  |    |                             | \t \t\n        |  |    |                             | \t \t\n         |  |   |                             | \t \t\n          `| `| |                             | \t \t\n            `| `|                             | \t \t\n            _| ||                             | \t \t\n           (__|  |                           | \t \t\n        _..---..` |                         |`..---.._ \t \t\n     .-.           |                       |          .-. \t \t\n    :               `-.__             __.-.              : \t \t\n    :                  ) ..---...---.. (                 : \t \t\n     .._               `.--...___...--.`              _.. \t \t\n       |..--..__                              __..--..| \t \t\n        .._     ...----.....______.....----...     _.. \t \t\n           `..--..,,_____            _____,,..--..` \t \t\n                         `...----..."
+	},
+	"FILES": {
+		"AUDIO_FOLDER_ADDRESS": "./audio/",
+		"AUDIO_SUFFIX": ".mp3"
+	},
+	"CONFIG": {
+		"COMMANDS_QUEUE_CHECK_INTERVAL": 500
+	}
+}

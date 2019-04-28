@@ -12,8 +12,10 @@ Audio files for the audio folder.
 
 ## Deployment
 
-Provide the bot with the required details for using it on your server.
-Use the "RunOrange.bat" for starting the bot and enjoy.
+- Install discord.js using "npm i -S discord.js".
+- Change the value in "auth.json" file to your bot's token.
+- Put any audio files you would like to play in the "audio" folder.
+- Use "npm start" for starting the bot.
 
 ## Built With
 
