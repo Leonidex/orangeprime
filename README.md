@@ -14,6 +14,7 @@ Audio files for the audio folder.
 
 - Install discord.js using "npm i -S discord.js".
 - Change the value in "auth.json" file to your bot's token.
+- Change the id values in "./settings/constants.json" to your and your bot's ids.
 - Put any audio files you would like to play in the "audio" folder.
 - Use "npm start" for starting the bot.
 
