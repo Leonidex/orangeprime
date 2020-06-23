@@ -20,6 +20,10 @@
         "SAY": {
             "call": "asay",
             "description": "Makes the bot say something in a specific channel."
+        },
+        "TEST": {
+            "call": "test",
+            "description": "Testing, testing... 1 2, 1 2..."
         }
     },
     "UTIL_GROUP": {
@@ -69,6 +73,11 @@
             "call": "playlist",
             "short": "pll",
             "description": "Lists available audio tracks."
+        },
+        "LIST_NEW": {
+            "call": "playlistnew",
+            "short": "new",
+            "description": "Lists the new audio tracks."
         },
         "PLAY_SKIP": {
             "call": "skip",

@@ -1,12 +1,12 @@
-const constants = require('./settings/constants.json');
+const CONSTANTS = require('./settings/constants.json');
 const fs = require('fs');
 
 const getFileNameFromFileAddress = (fileAddress) => {
-    return fileAddress.substring(fileAddress.lastIndexOf("/") + 1, fileAddress.indexOf(constants.FILES.AUDIO_SUFFIX));
+    return fileAddress.substring(fileAddress.lastIndexOf("/") + 1, fileAddress.indexOf(CONSTANTS.FILES.AUDIO_SUFFIX));
 }
 
 const getFileAddressFromFileName = (fileName) => {
-    return constants.FILES.AUDIO_FOLDER_ADDRESS + fileName + constants.FILES.AUDIO_SUFFIX;
+    return CONSTANTS.FILES.AUDIO_FOLDER_ADDRESS + fileName + CONSTANTS.FILES.AUDIO_SUFFIX;
 }
 
 const checkIfFile = (file, cb) => {

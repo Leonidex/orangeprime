@@ -1,8 +1,11 @@
 {
 	"_PREFIX": "-",
 	"IDS": {
-		"ADMIN_ID": {your discord id},
-		"BOT_ID": {your bot's id}
+		"ADMIN_ID": "{your admin id}",
+		"BOT_ID": "{your bot's id}",
+        "ROLE_GUILD_ID": "{your guild id}",
+        "ROLE_ID": "{the given role id}",
+        "ROLE_MESSAGING_CHANNEL": "{messaging channel id}"
 	},
 	"FORMATTING": {
 		"HAIKU": "```",
@@ -26,9 +29,19 @@
 	},
 	"FILES": {
 		"AUDIO_FOLDER_ADDRESS": "./audio/",
-		"AUDIO_SUFFIX": ".mp3"
+		"NEW_AUDIO_LIST_ADDRESS": "./audio/listmp3.json",
+        "AUDIO_SUFFIX": ".mp3",
+        "ACTIVE_USERS_LOG_ADDRESS": "./settings/activeusers_log.json"
 	},
 	"CONFIG": {
-		"COMMANDS_QUEUE_CHECK_INTERVAL": 500
+		"COMMANDS_QUEUE_CHECK_INTERVAL": 500,
+        "DISCONNECTION_DELAY": 1800000,
+        "PLAY_VOLUME": 0.7,
+        "MIN_ROLE_CHANGED_DELAY": 43200000,
+        "MAX_ROLE_CHANGED_DELAY": 86400000,
+        "MIN_ROLE_PERIOD": 120000,
+        "MAX_ROLE_PERIOD": 420000,
+        "INACTIVE_USERS_TIMEOUT": 2592000000,
+        "ACTIVE_USERS_LOG_UPDATE_DELAY": "600000"
 	}
 }
